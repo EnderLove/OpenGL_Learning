@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <iostream>
 
+void processInput(GLFWwindow* window) //Gets the window
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true); //If the key has been pressed the window close state change to true
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -39,8 +45,13 @@ int main()
 	//The arguments are pointers, especially the second one, thats why you dont pass arguments :D REMEMBER THAT!!!!
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window)) //RENDER LOOP (FRAMES)
 	{
+		processInput(window); //Checks for esc
+
+		glClearColor(0.1f, 0.1f, 0.3f, 1.0f); //This sets the color of the screen
+		glClear(GL_COLOR_BUFFER_BIT);         //This clear the previus frame so you dont watch it
+
 		glfwSwapBuffers(window); //This swap the buffers to avoid flickering issues
 		glfwPollEvents();        //Checks for events
 	}
