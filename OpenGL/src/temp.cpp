@@ -26,7 +26,6 @@ const char* fragmentShaderSource = "#version 330 core\n"
 	"	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 	"}\0";
 
-
 void processInput(GLFWwindow* window) //Gets the window
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -61,6 +60,13 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window); //Set the context of the current window
+
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK)
+	{
+		std::cout << "Failed to initialize GLEW" << std::endl;
+		return -1;
+	}
 	
 	//This function is called everytime the window is rezised 
 	//The arguments are pointers, especially the second one, thats why you dont pass arguments :D REMEMBER THAT!!!!
@@ -128,7 +134,6 @@ int main()
 		std::cout << "ERROR::SHADER::LINK::LINKING FAILED\n" << infoLog << std::endl;
 	}
 
-	//glUseProgram(shaderProgram); //Calls the object program to active it
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 	//We delete the shader objects because there are now linked to the program object
@@ -136,11 +141,26 @@ int main()
 	//So far we sent the input vertex data to the GPU and instructed the GPU how it should 
 	//process the vertex data within a vertex and fragemnt shader.
 
-
-	float vertices[] = {
+	/*
+		float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
 		 0.5f, -0.5f, 0.0f,
 		 0.0f,  0.5f, 0.0f
+	};
+	*/
+
+
+
+	float vertices[] = {
+		 0.5,  0.5, 0.0,
+	   	 0.5, -0.5, 0.0,
+		-0.5, -0.5, 0.0,
+		-0.5,  0.5, 0.0
+	};
+
+	unsigned int indices[] = {
+		0, 1, 3,
+		1, 2, 3
 	};
 
 
@@ -154,9 +174,10 @@ int main()
 	//===================== VERTEX ARRAY OBJECT (VAO) ==================
 	//==================================================================
 
-	unsigned int VBO, VAO;
+	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO); 
 	glGenBuffers(1, &VBO); //This function generates a buffer with an ID
+	glGenBuffers(1, &EBO);
 	
 	glBindVertexArray(VAO); //Always bind the Vertex Array Object first
 
@@ -166,6 +187,10 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	//The fourth parameter specifies how we want the graphics card to manage the given data
 	//GL_STREAM_DRAW, GL_STATIC_DRAW, GL_DYNAMIC_DRAW
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -190,7 +215,9 @@ int main()
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 
 
 		glfwSwapBuffers(window); //This swap the buffers to avoid flickering issues
